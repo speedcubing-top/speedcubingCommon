@@ -1,11 +1,11 @@
 package top.speedcubing.common;
 
-import com.google.common.collect.Sets;
 import java.util.Timer;
 import java.util.TimerTask;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.database.DatabaseData;
 import top.speedcubing.common.events.CubingTickEvent;
+import top.speedcubing.lib.utils.collection.Sets;
 
 public class CubingTick {
     public static Timer calcTimer;
@@ -18,7 +18,7 @@ public class CubingTick {
             @Override
             public void run() {
                 try {
-                    DatabaseData.champs = Sets.newHashSet(Database.connection.select("id").from("champ").getIntArray());
+                    DatabaseData.champs = Sets.hashSet(Database.connection.select("id").from("champ").getIntArray());
                     DatabaseData.onlineCount = Database.systemConnection.select("SUM(onlinecount)").from("proxies").getInt();
                     event.call();
                 } catch (Exception e) {

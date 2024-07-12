@@ -1,6 +1,5 @@
 package top.speedcubing.common.rank;
 
-import com.google.common.collect.Sets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -10,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.database.DatabaseData;
+import top.speedcubing.lib.utils.SQL.SQLBuilder;
+import top.speedcubing.lib.utils.collection.Sets;
 
 public class Rank {
     public static Map<String, Set<String>> grouppermissions = new HashMap<>();
@@ -33,6 +34,10 @@ public class Rank {
 
     public static String getRank(String rank, int id) {
         return rank.equals("default") && DatabaseData.champs.contains(id) ? "champ" : rank;
+    }
+
+    public static String getRankByDiscordID(long discordID) {
+        return Database.systemConnection.select("priority").from("speedcubing", "playersdata").where("uuid=(" + new SQLBuilder().select("verifieduuid").from("speedcubingsystem", "memberdata").where("id=" + discordID).toSQL() + ")").getString();
     }
 
     public static int getCode(String rank) {
@@ -61,7 +66,7 @@ public class Rank {
                 String prefix = r.getString("prefix");
                 String chatColor = r.getString("chatcolor");
                 long discord = r.getLong("discord");
-                Set<String> perms = Sets.newHashSet(r.getString("perms").split("\\|"));
+                Set<String> perms = Sets.hashSet(r.getString("perms").split("\\|"));
 
                 Rank rank = new Rank(name, weight, prefix, chatColor, discord, perms);
                 rankByName.put(name, rank);
@@ -80,7 +85,7 @@ public class Rank {
 
         grouppermissions.clear();
         for (String s : Database.systemConnection.select("name").from("groups").getStringArray())
-            grouppermissions.put(s, Sets.newHashSet(Database.systemConnection.select("perms").from("groups").where("name='" + s + "'").getString().split("\\|")));
+            grouppermissions.put(s, Sets.hashSet(Database.systemConnection.select("perms").from("groups").where("name='" + s + "'").getString().split("\\|")));
     }
 
     public String getRank() {
