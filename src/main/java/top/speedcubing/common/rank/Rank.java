@@ -57,6 +57,7 @@ public class Rank {
 
         List<Rank> rankByOrder = new ArrayList<>();
 
+        //ranks
         try {
             ResultSet r = Database.configConnection.select("*").from("mc_ranks").executeQuery();
 
@@ -72,8 +73,19 @@ public class Rank {
                 rankByName.put(name, rank);
                 rankByOrder.add(rank);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        //perms
+        try {
+            grouppermissions.clear();
+            ResultSet r = Database.configConnection.select("name,perms").from("mc_permsets").executeQuery();
+            while (r.next()) {
+                grouppermissions.put(r.getString("name"), Sets.hashSet(r.getString("perms").split("\\|")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
 
 
@@ -82,10 +94,6 @@ public class Rank {
         for (int i = 0; i < rankByOrder.size(); i++) {
             rankByOrder.get(i).orderCode = i;
         }
-
-        grouppermissions.clear();
-        for (String s : Database.systemConnection.select("name").from("groups").getStringArray())
-            grouppermissions.put(s, Sets.hashSet(Database.systemConnection.select("perms").from("groups").where("name='" + s + "'").getString().split("\\|")));
     }
 
     public String getRank() {
