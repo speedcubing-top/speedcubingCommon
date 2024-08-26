@@ -1,5 +1,6 @@
 package top.speedcubing.common.rank;
 
+import com.google.common.collect.Sets;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -22,6 +23,12 @@ public class PermissionSet {
 
     private PermissionSet(String name) {
         this.name = name;
+    }
+
+
+    private PermissionSet(String name, String perms) {
+        this.name = name;
+        this.permissions.addAll(Sets.newHashSet(perms.split("\\|")));
     }
 
     public Set<String> getPerms() {
@@ -66,7 +73,7 @@ public class PermissionSet {
         try (ResultSet r = Database.configConnection.select("name,perms").from("mc_permsets").executeQuery()) {
             PermissionSet.sets.clear();
             while (r.next()) {
-                PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("perms")));
+                PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("name"), r.getString("perms")));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
