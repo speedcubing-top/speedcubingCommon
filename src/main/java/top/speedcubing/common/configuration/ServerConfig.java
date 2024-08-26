@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import java.io.FileReader;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.events.ConfigReloadEvent;
-import top.speedcubing.common.rank.Rank;
+import top.speedcubing.common.rank.RankLoader;
 import top.speedcubing.common.server.MinecraftServer;
 
 public class ServerConfig {
@@ -27,7 +27,7 @@ public class ServerConfig {
                 Database.connect(DatabaseURL, DatabaseUser, DatabasePassword);
             }
 
-            Rank.loadRanks();
+            RankLoader.loadRanks();
             MinecraftServer.loadServers();
             event.call();
         } catch (Exception exception) {

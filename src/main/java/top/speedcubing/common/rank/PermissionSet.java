@@ -1,0 +1,112 @@
+package top.speedcubing.common.rank;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
+import top.speedcubing.common.database.Database;
+
+public class PermissionSet {
+
+    public static Pattern regex = Pattern.compile("^group\\.[^|*.]+$");
+    public static HashMap<String, PermissionSet> sets = new HashMap<>();
+
+    private final String name;
+    private final Set<String> permissions = new HashSet<>();
+
+    private PermissionSet(String name) {
+        this.name = name;
+    }
+
+    public Set<String> getPerms() {
+        return permissions;
+    }
+
+    public void addPerms(Set<String> perms) {
+        permissions.addAll(perms);
+        update();
+    }
+
+    public void removePerms(Set<String> perms) {
+        permissions.removeAll(perms);
+        update();
+    }
+
+    public void reset() {
+        permissions.clear();
+        update();
+    }
+
+    public void update() {
+        Database.configConnection.update("mc_permsets", "perms=\"" + getPermString() + "\"", "name=\"" + name + "\"");
+    }
+
+    private String getPermString() {
+        if (permissions.isEmpty()) {
+            return "";
+        }
+        StringBuilder reason = new StringBuilder();
+        List<String> perms = new ArrayList<>(permissions);
+        Collections.sort(perms);
+        for (String string : perms) {
+            reason.append("|").append(string);
+        }
+        return reason.substring(1);
+    }
+
+    //utils
+
+    public static void reload() {
+        try (ResultSet r = Database.configConnection.select("name,perms").from("mc_permsets").executeQuery()) {
+            PermissionSet.sets.clear();
+            while (r.next()) {
+                PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("perms")));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static PermissionSet get(String name) {
+        return sets.get(name);
+    }
+
+    public static boolean create(String name) {
+        if (sets.containsKey(name) || !regex.matcher(name).matches()) {
+            return false;
+        }
+        sets.put(name, new PermissionSet(name));
+        Database.configConnection.insert("mc_permsets", "name", name);
+        return true;
+    }
+
+    public static boolean delete(String name) {
+        if (!sets.containsKey(name) || !regex.matcher(name).matches()) {
+            return false;
+        }
+        sets.remove(name);
+        Database.configConnection.insert("mc_permsets", "name", name);
+        return true;
+    }
+
+    public static void findGroups(Set<String> perms) {
+        perms.remove("");
+        Set<String> toAdd = new HashSet<>();
+        Iterator<String> iterator = perms.iterator();
+        while (iterator.hasNext()) {
+            String s = iterator.next();
+            PermissionSet set = sets.get(s);
+            if (set != null) {
+                iterator.remove();
+                toAdd.addAll(set.getPerms());
+            }
+        }
+        perms.addAll(toAdd);
+    }
+}
