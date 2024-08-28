@@ -108,7 +108,10 @@ public class PermissionSet {
         Iterator<String> iterator = perms.iterator();
         while (iterator.hasNext()) {
             String s = iterator.next();
-            PermissionSet set = sets.get(s);
+            if (!regex.matcher(s).matches()) {
+                continue;
+            }
+            PermissionSet set = sets.get(s.substring(6));
             if (set != null) {
                 iterator.remove();
                 toAdd.addAll(set.getPerms());

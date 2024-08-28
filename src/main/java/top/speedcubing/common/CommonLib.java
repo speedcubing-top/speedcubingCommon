@@ -14,6 +14,6 @@ public class CommonLib {
     }
 
     public static void shutdown() {
-        CubingTick.calcTimer.cancel();
+        CubingTick.tickTimer.cancel();
     }
 }

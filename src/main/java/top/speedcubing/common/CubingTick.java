@@ -8,12 +8,12 @@ import top.speedcubing.common.events.CubingTickEvent;
 import top.speedcubing.lib.utils.collection.Sets;
 
 public class CubingTick {
-    public static Timer calcTimer;
+    public static Timer tickTimer;
     private static final CubingTickEvent event = new CubingTickEvent();
 
     public static void init() {
-        calcTimer = new Timer("Cubing-Tick-Thread");
-        calcTimer.schedule(new TimerTask() {
+        tickTimer = new Timer("Cubing-Tick-Thread");
+        tickTimer.schedule(new TimerTask() {
 
             @Override
             public void run() {
