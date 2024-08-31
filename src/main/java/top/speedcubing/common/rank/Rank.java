@@ -1,16 +1,12 @@
 package top.speedcubing.common.rank;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.database.DatabaseData;
 import top.speedcubing.lib.utils.SQL.SQLBuilder;
-import top.speedcubing.lib.utils.collection.Sets;
+import top.speedcubing.lib.utils.SystemUtils;
 
 public class Rank {
 
@@ -54,12 +50,32 @@ public class Rank {
 
     //utils
 
-    public static String getRank(String rank, int id) {
-        return rank.equals("default") && DatabaseData.champs.contains(id) ? "champ" : rank;
+    /*
+      database priority, player id
+    */
+
+    public static String getRank(String dbRank, int id) {
+        //default, champ
+        if (dbRank.equals("default") && DatabaseData.champs.contains(id)) {
+            return "champ";
+        }
+
+        return calculatePeriodRank(dbRank, id);
     }
 
-    public static String getRankByDiscordID(long discordID) {
-        return Database.systemConnection.select("priority").from("speedcubing", "playersdata").where("uuid=(" + new SQLBuilder().select("verifieduuid").from("speedcubingsystem", "memberdata").where("id=" + discordID).toSQL() + ")").getString();
+    private static String calculatePeriodRank(String dbRank, int id) {
+        String[] data = Database.connection.select("priority,at,period").from("periodrank").where("id=" + id).orderBy("at DESC").limit(0, 1).getStringArray();
+
+        if (data.length == 0) {
+            return dbRank;
+        }
+
+        //unit. second
+        if ((SystemUtils.getCurrentSecond() - Integer.parseInt(data[1])) < Integer.parseInt(data[2])) {
+            return data[0];
+        }
+
+        return dbRank;
     }
 
     public static int getCode(String rank) {
