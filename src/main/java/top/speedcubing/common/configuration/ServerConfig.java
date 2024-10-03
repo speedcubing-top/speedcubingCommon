@@ -13,7 +13,7 @@ public class ServerConfig {
     private static final ConfigReloadEvent event = new ConfigReloadEvent();
 
     public static void reload(boolean init) {
-        reload("/opt/storage/server.json", init);
+        reload("/storage/server.json", init);
     }
 
     public static void reload(String path, boolean init) {
