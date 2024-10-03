@@ -26,7 +26,6 @@ public class ServerConfig {
             if (init) {
                 Database.connect(DatabaseURL, DatabaseUser, DatabasePassword);
             }
-
             RankLoader.loadRanks();
             MinecraftServer.loadServers();
             event.call();
