@@ -69,6 +69,6 @@ public class MinecraftServer {
     }
 
     public String getWebhook() {
-        return Database.configConnection.select("discord_webhook").from("mc_servers").where("server='" + name + "'").getString();
+        return Database.configConnection.select("discord_webhook").from("mc_servers").where("name='" + name + "'").getString();
     }
 }
