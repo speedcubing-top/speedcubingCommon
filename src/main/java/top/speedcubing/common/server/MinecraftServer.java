@@ -23,7 +23,7 @@ public class MinecraftServer {
     public static void loadServers() {
         try {
             servers.clear();
-            ResultSet r = Database.systemConnection.select("name,host,port").from("servers").executeQuery();
+            ResultSet r = Database.configConnection.select("name,host,port").from("mc_servers").executeQuery();
             while (r.next()) {
                 String name = r.getString("name");
                 String host = r.getString("host");
