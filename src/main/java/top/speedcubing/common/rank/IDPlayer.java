@@ -16,10 +16,10 @@ public abstract class IDPlayer {
     }
 
     public void dbUpdate(String field) {
-        Database.connection.update("playersdata", field, "id=" + id);
+        Database.getCubing().update("playersdata", field, "id=" + id);
     }
 
     public SQLConnection.SQLPrepare dbSelect(String field) {
-        return Database.connection.select(field).from("playersdata").where("id=" + id);
+        return Database.getCubing().select(field).from("playersdata").where("id=" + id);
     }
 }

@@ -18,8 +18,8 @@ public class CubingTick {
             @Override
             public void run() {
                 try {
-                    DatabaseData.champs = Sets.hashSet(Database.connection.select("id").from("champ").getIntArray());
-                    DatabaseData.onlineCount = Database.systemConnection.select("SUM(onlinecount)").from("proxies").getInt();
+                    DatabaseData.champs = Sets.hashSet(Database.getCubing().select("id").from("champ").getIntArray());
+                    DatabaseData.onlineCount = Database.getSystem().select("SUM(onlinecount)").from("proxies").getInt();
                     event.call();
                 } catch (Exception e) {
                     e.printStackTrace();

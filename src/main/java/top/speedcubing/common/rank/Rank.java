@@ -64,7 +64,7 @@ public class Rank {
     }
 
     private static String calculatePeriodRank(String dbRank, int id) {
-        String[] data = Database.connection.select("priority,at,duration").from("periodrank").where("id=" + id).orderBy("at DESC").limit(0, 1).getStringArray();
+        String[] data = Database.getCubing().select("priority,at,duration").from("periodrank").where("id=" + id).orderBy("at DESC").limit(0, 1).getStringArray();
 
         if (data.length == 0) {
             return dbRank;

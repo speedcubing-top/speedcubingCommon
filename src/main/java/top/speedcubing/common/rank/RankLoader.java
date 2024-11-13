@@ -19,9 +19,7 @@ public class RankLoader {
         List<Rank> rankByOrder = new ArrayList<>();
 
         //ranks
-        try {
-            ResultSet r = Database.configConnection.select("*").from("mc_ranks").executeQuery();
-
+        try (ResultSet r = Database.getConfig().select("*").from("mc_ranks").executeQuery()) {
             while (r.next()) {
                 String name = r.getString("name");
                 int weight = r.getInt("weight");

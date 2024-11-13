@@ -7,13 +7,12 @@ import java.time.format.DateTimeFormatter;
 public class DailyStats {
     public static void validate() {
         String today = getToday();
-        if (!Database.systemConnection.exist("daily", "date='" + today + "'"))
-            Database.systemConnection.insert("daily", "date", "'" + today + "'");
+        Database.getSystem().executeUpdate("INSERT IGNORE INTO daily (date) VALUES ("+today+")");
     }
 
     public static void update(String s) {
         validate();
-        Database.systemConnection.update("daily", s, "date='" + getToday() + "'");
+        Database.getSystem().executeUpdate("UPDATE daily SET " + s + " WHERE date='" + getToday() + "'");
     }
 
     public static String getToday() {

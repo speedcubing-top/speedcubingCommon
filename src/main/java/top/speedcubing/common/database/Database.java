@@ -3,9 +3,21 @@ package top.speedcubing.common.database;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 
 public class Database {
-    public static SQLConnection connection;
-    public static SQLConnection systemConnection;
-    public static SQLConnection configConnection;
+    private static ThreadLocal<SQLConnection> cubingConnectionHolder;
+    private static ThreadLocal<SQLConnection> systemConnectionHolder;
+    private static ThreadLocal<SQLConnection> configConnectionHolder;
+
+    public static SQLConnection getCubing() {
+        return cubingConnectionHolder.get();
+    }
+
+    public static SQLConnection getSystem() {
+        return systemConnectionHolder.get();
+    }
+
+    public static SQLConnection getConfig() {
+        return configConnectionHolder.get();
+    }
 
     public static void connect(String url, String user, String password) {
         try {
@@ -13,8 +25,8 @@ public class Database {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        connection = new SQLConnection(url.replace("%db%", "speedcubing"), user, password);
-        systemConnection = new SQLConnection(url.replace("%db%", "speedcubingsystem"), user, password);
-        configConnection = new SQLConnection(url.replace("%db%", "sc_config"), user, password);
+        cubingConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "speedcubing"), user, password));
+        systemConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "speedcubingsystem"), user, password));
+        configConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "sc_config"), user, password));
     }
 }

@@ -51,7 +51,7 @@ public class PermissionSet {
     }
 
     public void update() {
-        Database.configConnection.update("mc_permsets", "perms=\"" + getPermString() + "\"", "name=\"" + name + "\"");
+        Database.getConfig().update("mc_permsets", "perms=\"" + getPermString() + "\"", "name=\"" + name + "\"");
     }
 
     private String getPermString() {
@@ -70,7 +70,7 @@ public class PermissionSet {
     //utils
 
     public static void reload() {
-        try (ResultSet r = Database.configConnection.select("name,perms").from("mc_permsets").executeQuery()) {
+        try (ResultSet r = Database.getConfig().select("name,perms").from("mc_permsets").executeQuery()) {
             PermissionSet.sets.clear();
             while (r.next()) {
                 PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("name"), r.getString("perms")));
@@ -89,7 +89,7 @@ public class PermissionSet {
             return false;
         }
         sets.put(name, new PermissionSet(name));
-        Database.configConnection.insert("mc_permsets", "name", name);
+        Database.getConfig().insert("mc_permsets", "name", name);
         return true;
     }
 
@@ -98,7 +98,7 @@ public class PermissionSet {
             return false;
         }
         sets.remove(name);
-        Database.configConnection.insert("mc_permsets", "name", name);
+        Database.getConfig().insert("mc_permsets", "name", name);
         return true;
     }
 

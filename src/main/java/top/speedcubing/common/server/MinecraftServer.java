@@ -23,7 +23,7 @@ public class MinecraftServer {
     public static void loadServers() {
         try {
             servers.clear();
-            ResultSet r = Database.configConnection.select("name,host,port").from("mc_servers").executeQuery();
+            ResultSet r = Database.getConfig().select("name,host,port").from("mc_servers").executeQuery();
             while (r.next()) {
                 String name = r.getString("name");
                 String host = r.getString("host");
@@ -49,7 +49,7 @@ public class MinecraftServer {
     }
 
     public int getPlayerCount() {
-        return Database.systemConnection.select("SUM(onlinecount)").from("stat_onlinecount").where("server='" + name + "'").getInt();
+        return Database.getSystem().select("SUM(onlinecount)").from("stat_onlinecount").where("server='" + name + "'").getInt();
     }
 
     public void write(byte[] data) {
@@ -69,6 +69,6 @@ public class MinecraftServer {
     }
 
     public String getWebhook() {
-        return Database.configConnection.select("discord_webhook").from("mc_servers").where("name='" + name + "'").getString();
+        return Database.getConfig().select("discord_webhook").from("mc_servers").where("name='" + name + "'").getString();
     }
 }
