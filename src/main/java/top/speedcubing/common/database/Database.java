@@ -22,11 +22,11 @@ public class Database {
     public static void connect(String url, String user, String password) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
+            cubingConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "speedcubing"), user, password));
+            systemConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "speedcubingsystem"), user, password));
+            configConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "sc_config"), user, password));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-        cubingConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "speedcubing"), user, password));
-        systemConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "speedcubingsystem"), user, password));
-        configConnectionHolder = ThreadLocal.withInitial(() -> new SQLConnection(url.replace("%db%", "sc_config"), user, password));
     }
 }

@@ -1,7 +1,5 @@
 package top.speedcubing.common.rank;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import top.speedcubing.common.database.Database;
+import top.speedcubing.lib.utils.SQL.SQLResult;
+import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.collection.Sets;
 
 public class PermissionSet {
@@ -70,13 +70,9 @@ public class PermissionSet {
     //utils
 
     public static void reload() {
-        try (ResultSet r = Database.getConfig().select("name,perms").from("mc_permsets").executeQuery()) {
-            PermissionSet.sets.clear();
-            while (r.next()) {
-                PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("name"), r.getString("perms")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+        SQLResult result = Database.getConfig().select("name,perms").from("mc_permsets").executeResult();
+        for (SQLRow r : result) {
+            PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("name"), r.getString("perms")));
         }
     }
 

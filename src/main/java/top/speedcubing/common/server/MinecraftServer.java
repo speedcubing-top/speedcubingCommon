@@ -1,11 +1,11 @@
 package top.speedcubing.common.server;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import top.speedcubing.common.database.Database;
+import top.speedcubing.lib.utils.SQL.SQLResult;
+import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 import top.speedcubing.lib.utils.sockets.TCPClient;
 
@@ -21,20 +21,14 @@ public class MinecraftServer {
     }
 
     public static void loadServers() {
-        try {
-            servers.clear();
-            ResultSet r = Database.getConfig().select("name,host,port").from("mc_servers").executeQuery();
-            while (r.next()) {
-                String name = r.getString("name");
-                String host = r.getString("host");
-                int port = r.getInt("port");
-                servers.put(name, new MinecraftServer(name, new HostAndPort(host, port)));
-            }
-            r.getStatement().close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        servers.clear();
+        SQLResult result = Database.getConfig().select("name,host,port").from("mc_servers").executeResult();
+        for (SQLRow r : result) {
+            String name = r.getString("name");
+            String host = r.getString("host");
+            int port = r.getInt("port");
+            servers.put(name, new MinecraftServer(name, new HostAndPort(host, port)));
         }
-
     }
 
     private final HostAndPort address;
