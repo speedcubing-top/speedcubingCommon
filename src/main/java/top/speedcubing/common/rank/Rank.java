@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.database.DatabaseData;
-import top.speedcubing.lib.utils.SQL.SQLBuilder;
+import top.speedcubing.lib.utils.SQL.SQLConnection;
 import top.speedcubing.lib.utils.SystemUtils;
 
 public class Rank {
@@ -64,18 +64,20 @@ public class Rank {
     }
 
     private static String calculatePeriodRank(String dbRank, int id) {
-        String[] data = Database.getCubing().select("priority,at,duration").from("periodrank").where("id=" + id).orderBy("at DESC").limit(0, 1).getStringArray();
+        try (SQLConnection connection = Database.getCubing()) {
+            String[] data = connection.select("priority,at,duration").from("periodrank").where("id=" + id).orderBy("at DESC").limit(0, 1).getStringArray();
 
-        if (data.length == 0) {
+            if (data.length == 0) {
+                return dbRank;
+            }
+
+            //unit. second
+            if ((SystemUtils.getCurrentSecond() - Integer.parseInt(data[1])) < Integer.parseInt(data[2])) {
+                return data[0];
+            }
+
             return dbRank;
         }
-
-        //unit. second
-        if ((SystemUtils.getCurrentSecond() - Integer.parseInt(data[1])) < Integer.parseInt(data[2])) {
-            return data[0];
-        }
-
-        return dbRank;
     }
 
     public static int getCode(String rank) {

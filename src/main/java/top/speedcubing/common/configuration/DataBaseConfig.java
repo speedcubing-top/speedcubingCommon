@@ -1,9 +1,12 @@
 package top.speedcubing.common.configuration;
 
 import top.speedcubing.common.database.Database;
+import top.speedcubing.lib.utils.SQL.SQLConnection;
 
 public class DataBaseConfig {
     public static String get(String key) {
-        return Database.getConfig().prepare("SELECT value FROM settings WHERE name=?").setString(1, key).getString();
+        try (SQLConnection connection = Database.getCubing()) {
+            return connection.prepare("SELECT value FROM settings WHERE name=?").setString(1, key).getString();
+        }
     }
 }

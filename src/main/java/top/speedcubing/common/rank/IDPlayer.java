@@ -17,10 +17,14 @@ public abstract class IDPlayer {
     }
 
     public void dbUpdate(String field) {
-        Database.getCubing().update("playersdata", field, "id=" + id);
+        try (SQLConnection connection = Database.getCubing()) {
+            connection.update("playersdata", field, "id=" + id);
+        }
     }
 
     public SQLPrepare dbSelect(String field) {
-        return Database.getCubing().select(field).from("playersdata").where("id=" + id);
+        try (SQLConnection connection = Database.getCubing()) {
+            return connection.select(field).from("playersdata").where("id=" + id);
+        }
     }
 }

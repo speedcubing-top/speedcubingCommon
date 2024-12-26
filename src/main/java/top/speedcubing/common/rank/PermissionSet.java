@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import top.speedcubing.common.database.Database;
+import top.speedcubing.lib.utils.SQL.SQLConnection;
 import top.speedcubing.lib.utils.SQL.SQLResult;
 import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.collection.Sets;
@@ -51,7 +52,9 @@ public class PermissionSet {
     }
 
     public void update() {
-        Database.getConfig().update("mc_permsets", "perms=\"" + getPermString() + "\"", "name=\"" + name + "\"");
+        try (SQLConnection connection = Database.getConfig()) {
+            connection.update("mc_permsets", "perms=\"" + getPermString() + "\"", "name=\"" + name + "\"");
+        }
     }
 
     private String getPermString() {
@@ -70,9 +73,11 @@ public class PermissionSet {
     //utils
 
     public static void reload() {
-        SQLResult result = Database.getConfig().select("name,perms").from("mc_permsets").executeResult();
-        for (SQLRow r : result) {
-            PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("name"), r.getString("perms")));
+        try (SQLConnection connection = Database.getConfig()) {
+            SQLResult result = connection.select("name,perms").from("mc_permsets").executeResult();
+            for (SQLRow r : result) {
+                PermissionSet.sets.put(r.getString("name"), new PermissionSet(r.getString("name"), r.getString("perms")));
+            }
         }
     }
 
@@ -85,7 +90,9 @@ public class PermissionSet {
             return false;
         }
         sets.put(name, new PermissionSet(name));
-        Database.getConfig().insert("mc_permsets", "name", name);
+        try (SQLConnection connection = Database.getConfig()) {
+            connection.insert("mc_permsets", "name", name);
+        }
         return true;
     }
 
@@ -94,7 +101,9 @@ public class PermissionSet {
             return false;
         }
         sets.remove(name);
-        Database.getConfig().insert("mc_permsets", "name", name);
+        try (SQLConnection connection = Database.getConfig()) {
+            connection.delete("mc_permsets", "name=\"" + name + "\"");
+        }
         return true;
     }
 
