@@ -6,7 +6,6 @@ import top.speedcubing.common.database.Database;
 import top.speedcubing.common.database.DatabaseData;
 import top.speedcubing.common.events.CubingTickEvent;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
-import top.speedcubing.lib.utils.collection.Sets;
 
 public class CubingTick {
     public static Timer tickTimer;
@@ -20,8 +19,9 @@ public class CubingTick {
             public void run() {
                 try (SQLConnection cubing = Database.getCubing();
                      SQLConnection system = Database.getSystem()) {
-                    DatabaseData.champs = Sets.hashSet(cubing.select("id").from("champ").getIntArray());
-                    DatabaseData.onlineCount = system.select("SUM(onlinecount)").from("proxies").getInt();
+                    DatabaseData.champs.clear();
+                    cubing.select("id").from("champ").executeResult().forEach(r -> r.forEach(f -> DatabaseData.champs.add(f.getInt())));
+                    DatabaseData.onlineCount = system.select("SUM(onlinecount)").from("proxies").executeResult().getInt();
                     event.call();
                 } catch (Exception e) {
                     e.printStackTrace();

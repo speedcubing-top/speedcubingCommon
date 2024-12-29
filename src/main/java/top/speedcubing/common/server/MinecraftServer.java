@@ -47,7 +47,7 @@ public class MinecraftServer {
 
     public int getPlayerCount() {
         try (SQLConnection connection = Database.getSystem()) {
-            return connection.select("SUM(onlinecount)").from("stat_onlinecount").where("server='" + name + "'").getInt();
+            return connection.select("SUM(onlinecount)").from("stat_onlinecount").where("server='" + name + "'").executeResult().getInt();
         }
     }
 
@@ -69,7 +69,7 @@ public class MinecraftServer {
 
     public String getWebhook() {
         try (SQLConnection connection = Database.getConfig()) {
-            return connection.select("discord_webhook").from("mc_servers").where("name='" + name + "'").getString();
+            return connection.select("discord_webhook").from("mc_servers").where("name='" + name + "'").executeResult().getString();
         }
     }
 }

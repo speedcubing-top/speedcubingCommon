@@ -6,6 +6,8 @@ import java.util.Set;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.database.DatabaseData;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
+import top.speedcubing.lib.utils.SQL.SQLResult;
+import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.SystemUtils;
 
 public class Rank {
@@ -65,15 +67,15 @@ public class Rank {
 
     private static String calculatePeriodRank(String dbRank, int id) {
         try (SQLConnection connection = Database.getCubing()) {
-            String[] data = connection.select("priority,at,duration").from("periodrank").where("id=" + id).orderBy("at DESC").limit(0, 1).getStringArray();
+            SQLRow data = connection.select("priority,at,duration").from("periodrank").where("id=" + id).orderBy("at DESC").limit(0, 1).executeResult().get(0);
 
-            if (data.length == 0) {
+            if (data == null) {
                 return dbRank;
             }
 
             //unit. second
-            if ((SystemUtils.getCurrentSecond() - Integer.parseInt(data[1])) < Integer.parseInt(data[2])) {
-                return data[0];
+            if ((SystemUtils.getCurrentSecond() - data.getInt("at")) < data.getInt("duration")) {
+                return data.getString("priority");
             }
 
             return dbRank;

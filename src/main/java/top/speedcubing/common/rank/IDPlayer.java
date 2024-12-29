@@ -4,6 +4,8 @@ import java.util.UUID;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 import top.speedcubing.lib.utils.SQL.SQLPrepare;
+import top.speedcubing.lib.utils.SQL.SQLResult;
+import top.speedcubing.lib.utils.SQL.SQLRow;
 
 public abstract class IDPlayer {
     public String realName;
@@ -22,9 +24,9 @@ public abstract class IDPlayer {
         }
     }
 
-    public SQLPrepare dbSelect(String field) {
+    public SQLRow dbSelect(String field) {
         try (SQLConnection connection = Database.getCubing()) {
-            return connection.select(field).from("playersdata").where("id=" + id);
+            return connection.select(field).from("playersdata").where("id=" + id).executeResult().get(0);
         }
     }
 }

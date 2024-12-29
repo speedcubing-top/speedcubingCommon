@@ -1,6 +1,7 @@
 package top.speedcubing.common;
 
 import top.speedcubing.common.configuration.ServerConfig;
+import top.speedcubing.common.database.Database;
 
 public class CommonLib {
     public static void init() {
@@ -15,5 +16,6 @@ public class CommonLib {
 
     public static void shutdown() {
         CubingTick.tickTimer.cancel();
+        Database.closeAllConnections();
     }
 }
