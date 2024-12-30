@@ -19,13 +19,12 @@ public class ServerConfig {
     public static void reload(String path, boolean init) {
         try {
             config = JsonParser.parseReader(new FileReader(path)).getAsJsonObject();
-            String DatabaseURL = config.getAsJsonObject("database").get("url").getAsString();
-            String DatabaseUser = config.getAsJsonObject("database").get("user").getAsString();
-            String DatabasePassword = config.getAsJsonObject("database").get("password").getAsString();
 
             if (init) {
-                Database.connect(DatabaseURL, DatabaseUser, DatabasePassword);
-            }
+                Database.connect();
+            } else
+                Database.reloadDataSourceConfig();
+
             RankLoader.loadRanks();
             MinecraftServer.loadServers();
             event.call();

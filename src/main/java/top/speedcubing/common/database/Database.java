@@ -1,13 +1,12 @@
 package top.speedcubing.common.database;
 
+import com.google.gson.JsonObject;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import top.speedcubing.common.configuration.ServerConfig;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 
 public class Database {
@@ -26,7 +25,6 @@ public class Database {
         return get("sc_config");
     }
 
-    public static String user, password, url;
     public static SQLConnection get(String database) {
         HikariDataSource dataSource = dataSourceMap.get(database);
         if (dataSource == null) {
@@ -34,14 +32,14 @@ public class Database {
         }
 
         try {
-            return new SQLConnection(DriverManager.getConnection(url.replace("%db%", database),user,password));
+            return new SQLConnection(dataSource.getConnection());
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static void connect(String url, String user, String password) {
+    public static void connect() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             System.out.println("MySQL JDBC Driver Registered!");
@@ -51,18 +49,49 @@ public class Database {
         }
 
         String[] databases = {"sc_config", "speedcubing", "speedcubingsystem"};
-        Database.url = url;
-        Database.user = user;
-        Database.password = password;
+        JsonObject dbConfig = ServerConfig.config.getAsJsonObject("database");
+        String url = dbConfig.get("url").getAsString();
+        String user = dbConfig.get("user").getAsString();
+        String password = dbConfig.get("password").getAsString();
         for (String db : databases) {
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(url.replace("%db%", db));
             config.setUsername(user);
             config.setPassword(password);
-            config.setMaximumPoolSize(10);
-            config.setIdleTimeout(Long.MAX_VALUE);
-            dataSourceMap.put(db, new HikariDataSource(config));
+            HikariDataSource dataSource = new HikariDataSource(config);
+            reloadDataSourceConfig(dataSource);
+            dataSourceMap.put(db, dataSource);
         }
+    }
+
+    public static void reloadDataSourceConfig() {
+        for (HikariDataSource dataSource : dataSourceMap.values()) {
+            reloadDataSourceConfig(dataSource);
+        }
+    }
+
+    public static void reloadDataSourceConfig(HikariDataSource dataSource) {
+        JsonObject hikariCPConfig = ServerConfig.config.getAsJsonObject("database").getAsJsonObject("hikaricp");
+        if (hikariCPConfig.has("connectionTimeout"))
+            dataSource.setConnectionTimeout(hikariCPConfig.get("connectionTimeout").getAsLong());
+
+        if (hikariCPConfig.has("validationTimeout"))
+            dataSource.setValidationTimeout(hikariCPConfig.get("validationTimeout").getAsLong());
+
+        if (hikariCPConfig.has("idleTimeOut"))
+            dataSource.setIdleTimeout(hikariCPConfig.get("idleTimeout").getAsLong());
+
+        if (hikariCPConfig.has("leakDetectionThreshold"))
+            dataSource.setLeakDetectionThreshold(hikariCPConfig.get("leakDetectionThreshold").getAsLong());
+
+        if (hikariCPConfig.has("maxLifetime"))
+            dataSource.setMaxLifetime(hikariCPConfig.get("maxLifetime").getAsLong());
+
+        if (hikariCPConfig.has("maxPoolSize"))
+            dataSource.setMaximumPoolSize(hikariCPConfig.get("maxPoolSize").getAsInt());
+
+        if (hikariCPConfig.has("minIdle"))
+            dataSource.setMinimumIdle(hikariCPConfig.get("minIdle").getAsInt());
     }
 
     public static void closeAllConnections() {
