@@ -1,5 +1,7 @@
 package top.speedcubing.common.server;
 
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,6 +9,8 @@ import top.speedcubing.common.database.Database;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 import top.speedcubing.lib.utils.SQL.SQLResult;
 import top.speedcubing.lib.utils.SQL.SQLRow;
+import top.speedcubing.lib.utils.bytes.ByteArrayBuffer;
+import top.speedcubing.lib.utils.bytes.IOUtils;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 import top.speedcubing.lib.utils.sockets.TCPClient;
 
@@ -58,8 +62,10 @@ public class MinecraftServer {
         TCPClient.write(listenerAddress, data);
     }
 
-    public byte[] writeAndRead(byte[] data) {
-        return TCPClient.writeAndReadAll(listenerAddress, data);
+    public DataInputStream writeResponse(byte[] data) {
+        byte[] packet = (new ByteArrayBuffer()).writeUTF("in").write(data).toByteArray();
+        byte[] response = TCPClient.writeAndReadAll(listenerAddress, packet);
+        return response == null ? null : IOUtils.toDataInputStream(response);
     }
 
     public HostAndPort getAddress() {
