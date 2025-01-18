@@ -24,12 +24,13 @@ public class MinecraftServer {
     public static void loadServers() {
         servers.clear();
         try (SQLConnection connection = Database.getConfig()) {
-            SQLResult result = connection.select("name,host,port").from("mc_servers").executeResult();
+            SQLResult result = connection.select("name,host,port,accept_socket").from("mc_servers").executeResult();
             for (SQLRow r : result) {
                 String name = r.getString("name");
                 String host = r.getString("host");
                 int port = r.getInt("port");
-                servers.put(name, new MinecraftServer(name, new HostAndPort(host, port)));
+                boolean accept_socket = r.getBoolean("accept_socket");
+                servers.put(name, new MinecraftServer(name, new HostAndPort(host, port), accept_socket));
             }
         }
     }
@@ -37,11 +38,13 @@ public class MinecraftServer {
     private final HostAndPort address;
     private final HostAndPort listenerAddress;
     private final String name;
+    private final boolean acceptSocket;
 
-    public MinecraftServer(String name, HostAndPort address) {
+    public MinecraftServer(String name, HostAndPort address, boolean accept_socket) {
         this.name = name;
         this.address = address;
         this.listenerAddress = new HostAndPort(address.getHost(), address.getPort() + 1000);
+        this.acceptSocket = accept_socket;
         servers.put(name, this);
     }
 
@@ -71,5 +74,9 @@ public class MinecraftServer {
         try (SQLConnection connection = Database.getConfig()) {
             return connection.select("discord_webhook").from("mc_servers").where("name='" + name + "'").executeResult().getString();
         }
+    }
+
+    public boolean isAcceptSocket() {
+        return acceptSocket;
     }
 }
