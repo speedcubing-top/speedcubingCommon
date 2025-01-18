@@ -58,6 +58,10 @@ public class MinecraftServer {
         TCPClient.write(listenerAddress, data);
     }
 
+    public byte[] writeAndRead(byte[] data) {
+        return TCPClient.writeAndReadAll(listenerAddress, data);
+    }
+
     public HostAndPort getAddress() {
         return address;
     }
