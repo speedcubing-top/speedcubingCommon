@@ -14,39 +14,36 @@ import top.speedcubing.lib.utils.bytes.IOUtils;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 import top.speedcubing.lib.utils.sockets.TCPClient;
 
-public class MinecraftServer {
-    private static final Map<String, MinecraftServer> servers = new HashMap<>();
+public class MinecraftProxy {
+    private static final Map<String, MinecraftProxy> proxies = new HashMap<>();
 
-    public static MinecraftServer getServer(String name) {
-        return servers.get(name);
+    public static MinecraftProxy getProxy(String name) {
+        return proxies.get(name);
     }
 
-    public static Collection<MinecraftServer> getServers() {
-        return servers.values();
+    public static Collection<MinecraftProxy> getProxies() {
+        return proxies.values();
     }
 
-    public static void loadServers() {
-        servers.clear();
+    public static void loadProxies() {
+        proxies.clear();
         try (SQLConnection connection = Database.getConfig()) {
-            SQLResult result = connection.select("name,host,port,accept_socket").from("mc_servers").executeResult();
+            SQLResult result = connection.select("name,host,port").from("mc_proxies").executeResult();
             for (SQLRow r : result) {
                 String name = r.getString("name");
                 String host = r.getString("host");
                 int port = r.getInt("port");
-                boolean accept_socket = r.getBoolean("accept_socket");
-                servers.put(name, new MinecraftServer(name, new HostAndPort(host, port), accept_socket));
+                proxies.put(name, new MinecraftProxy(name, new HostAndPort(host, port)));
             }
         }
     }
     private final HostAndPort listenerAddress;
     private final String name;
-    private final boolean acceptSocket;
 
-    public MinecraftServer(String name, HostAndPort address, boolean accept_socket) {
+    public MinecraftProxy(String name, HostAndPort address) {
         this.name = name;
         this.listenerAddress = new HostAndPort(address.getHost(), address.getPort() + 1000);
-        this.acceptSocket = accept_socket;
-        servers.put(name, this);
+        proxies.put(name, this);
     }
 
     public int getPlayerCount() {
@@ -71,15 +68,5 @@ public class MinecraftServer {
 
     public String getName() {
         return name;
-    }
-
-    public String getWebhook() {
-        try (SQLConnection connection = Database.getConfig()) {
-            return connection.select("discord_webhook").from("mc_servers").where("name='" + name + "'").executeResult().getString();
-        }
-    }
-
-    public boolean isAcceptSocket() {
-        return acceptSocket;
     }
 }
