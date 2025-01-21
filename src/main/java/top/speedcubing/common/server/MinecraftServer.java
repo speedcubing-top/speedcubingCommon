@@ -1,7 +1,6 @@
 package top.speedcubing.common.server;
 
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +20,15 @@ public class MinecraftServer {
         return servers.get(name);
     }
 
+    public static MinecraftServer getServer(HostAndPort listenerAddress) {
+        for (MinecraftServer s : servers.values()) {
+            if (s.getListenerAddress().equals(listenerAddress)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
     public static Collection<MinecraftServer> getServers() {
         return servers.values();
     }
@@ -38,6 +46,7 @@ public class MinecraftServer {
             }
         }
     }
+
     private final HostAndPort listenerAddress;
     private final String name;
     private final boolean acceptSocket;

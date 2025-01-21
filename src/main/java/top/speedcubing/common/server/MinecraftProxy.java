@@ -21,6 +21,15 @@ public class MinecraftProxy {
         return proxies.get(name);
     }
 
+    public static MinecraftProxy getProxy(HostAndPort listenerAddress) {
+        for (MinecraftProxy s : proxies.values()) {
+            if (s.getListenerAddress().equals(listenerAddress)) {
+                return s;
+            }
+        }
+        return null;
+    }
+
     public static Collection<MinecraftProxy> getProxies() {
         return proxies.values();
     }
