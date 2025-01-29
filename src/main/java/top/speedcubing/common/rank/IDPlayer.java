@@ -3,8 +3,6 @@ package top.speedcubing.common.rank;
 import java.util.UUID;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
-import top.speedcubing.lib.utils.SQL.SQLPrepare;
-import top.speedcubing.lib.utils.SQL.SQLResult;
 import top.speedcubing.lib.utils.SQL.SQLRow;
 
 public abstract class IDPlayer {
@@ -18,15 +16,24 @@ public abstract class IDPlayer {
         this.id = id;
     }
 
-    public void dbUpdate(String field) {
+    public SQLRow dbSelect(String field) {
         try (SQLConnection connection = Database.getCubing()) {
-            connection.update("playersdata", field, "id=" + id);
+            return dbSelect(connection, field);
         }
     }
 
-    public SQLRow dbSelect(String field) {
+    public SQLRow dbSelect(SQLConnection connection, String field) {
+        return connection.select(field).from("playersdata").where("id=" + id).executeResult().get(0);
+
+    }
+
+    public void dbUpdate(String field) {
         try (SQLConnection connection = Database.getCubing()) {
-            return connection.select(field).from("playersdata").where("id=" + id).executeResult().get(0);
+            dbUpdate(connection, field);
         }
+    }
+
+    public void dbUpdate(SQLConnection connection, String field) {
+        connection.update("playersdata", field, "id=" + id);
     }
 }
