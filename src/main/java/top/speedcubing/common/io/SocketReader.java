@@ -1,76 +1,89 @@
 package top.speedcubing.common.io;
 
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
 import top.speedcubing.common.events.SocketInputEvent;
 import top.speedcubing.common.events.SocketReadEvent;
-import top.speedcubing.lib.utils.Threads;
 import top.speedcubing.lib.utils.bytes.ByteArrayBuffer;
 import top.speedcubing.lib.utils.bytes.IOUtils;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 
 public class SocketReader {
-    private static SocketReader instance;
+    private final HostAndPort hostPort;
 
-    public static void init(HostAndPort hostPort) {
-        instance = new SocketReader(hostPort);
+    public HostAndPort getHostAndPort() {
+        return this.hostPort;
     }
 
-    public static HostAndPort getHostAndPort() {
-        return instance.hostPort;
-    }
+    public SocketReader(HostAndPort hostPort) {
+        this.hostPort = hostPort;
 
-    public static void shutdown() {
-        instance.running = false;
-    }
-
-    private ServerSocket tcpServer;
-    private boolean running = true;
-    private HostAndPort hostPort;
-
-    private SocketReader(HostAndPort hostPort) {
+        EventLoopGroup bossGroup = new NioEventLoopGroup();
+        EventLoopGroup workerGroup = new NioEventLoopGroup();
         try {
-            this.hostPort = hostPort;
-            this.tcpServer = new ServerSocket(hostPort.getPort());
-            this.tcpServer.setSoTimeout(0);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return;
-        }
-
-        Thread thread = Threads.newThread("Cubing-Socket-Thread", () -> {
-            while (running) {
-                try {
-                    Socket s = tcpServer.accept();
-                    OutputStream out = s.getOutputStream();
-                    InputStream in = s.getInputStream();
-                    DataInputStream data = new DataInputStream(in);
-                    try {
-                        String packetID = data.readUTF();
-                        if (packetID.equals("in")) {
-                            try {
-                                byte[] resend = new ByteArrayBuffer().write(((SocketInputEvent) new SocketInputEvent(data.readUTF(), data).call()).respond.toByteArray()).toByteArray();
-                                out.write(resend);
-                            } catch (IOException ex) {
-                                ex.printStackTrace();
-                            }
-                        } else {
-                            SocketReadEvent event = new SocketReadEvent(packetID, data, out);
-                            event.call();
+            ServerBootstrap b = new ServerBootstrap();
+            b.group(bossGroup, workerGroup)
+                    .channel(NioServerSocketChannel.class)
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast(new LengthFieldBasedFrameDecoder(1024 * 1024, 0, 4, 0, 4));
+                            pipeline.addLast(new LengthFieldPrepender(4));
+                            pipeline.addLast(new ServerHandler());
                         }
-                    } catch (Exception ex) {
-                        continue;
+                    });
+
+            b.bind(hostPort.getHost(), hostPort.getPort()).sync();
+        } catch (InterruptedException e) {
+
+        } finally {
+            bossGroup.shutdownGracefully();
+            workerGroup.shutdownGracefully();
+        }
+    }
+
+    static class ServerHandler extends SimpleChannelInboundHandler<ByteBuf> {
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, ByteBuf msg) {
+            byte[] bytes = new byte[msg.readableBytes()];
+            msg.readBytes(bytes);
+            ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+            DataInputStream data = new DataInputStream(in);
+            try {
+                String packetID = data.readUTF();
+                if (packetID.equals("in")) {
+                    try {
+                        byte[] resend = new ByteArrayBuffer().write(((SocketInputEvent) new SocketInputEvent(data.readUTF(), data).call()).respond.toByteArray()).toByteArray();
+                        ctx.writeAndFlush(Unpooled.wrappedBuffer(resend));
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
-                    IOUtils.closeQuietly(in, out, data, s);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                } else {
+                    SocketReadEvent event = new SocketReadEvent(packetID, data, ctx);
+                    event.call();
+                    if (!event.isWritten()) {
+                        ctx.writeAndFlush(Unpooled.wrappedBuffer(new ByteArrayBuffer().writeUTF("OK").toByteArray()));
+                    }
                 }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        });
-        thread.start();
+            IOUtils.closeQuietly(in, data);
+        }
     }
 }

@@ -1,18 +1,16 @@
 package top.speedcubing.common.server;
 
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import top.speedcubing.common.database.Database;
+import top.speedcubing.common.io.SocketWriter;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 import top.speedcubing.lib.utils.SQL.SQLResult;
 import top.speedcubing.lib.utils.SQL.SQLRow;
-import top.speedcubing.lib.utils.bytes.ByteArrayBuffer;
-import top.speedcubing.lib.utils.bytes.IOUtils;
 import top.speedcubing.lib.utils.internet.HostAndPort;
-import top.speedcubing.lib.utils.sockets.TCPClient;
 
 public class MinecraftProxy {
     private static final Map<String, MinecraftProxy> proxies = new HashMap<>();
@@ -46,6 +44,7 @@ public class MinecraftProxy {
             }
         }
     }
+
     private final HostAndPort listenerAddress;
     private final String name;
 
@@ -61,14 +60,8 @@ public class MinecraftProxy {
         }
     }
 
-    public void write(byte[] data) {
-        TCPClient.write(listenerAddress, data);
-    }
-
-    public DataInputStream writeResponse(byte[] data) {
-        byte[] packet = (new ByteArrayBuffer()).writeUTF("in").write(data).toByteArray();
-        byte[] response = TCPClient.writeAndReadAll(listenerAddress, packet);
-        return response == null ? null : IOUtils.toDataInputStream(response);
+    public CompletableFuture<DataInputStream> write(byte[] data) {
+        return SocketWriter.writeResponse(listenerAddress, data);
     }
 
     public HostAndPort getListenerAddress() {
