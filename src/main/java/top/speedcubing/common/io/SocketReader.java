@@ -3,6 +3,7 @@ package top.speedcubing.common.io;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -16,7 +17,7 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import top.speedcubing.common.events.SocketInputEvent;
+import java.util.Arrays;
 import top.speedcubing.common.events.SocketReadEvent;
 import top.speedcubing.lib.utils.bytes.ByteArrayBuffer;
 import top.speedcubing.lib.utils.bytes.IOUtils;
@@ -47,13 +48,9 @@ public class SocketReader {
                             pipeline.addLast(new ServerHandler());
                         }
                     });
-
             b.bind(hostPort.getHost(), hostPort.getPort()).sync();
         } catch (InterruptedException e) {
-
-        } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            e.printStackTrace();
         }
     }
 
@@ -66,18 +63,17 @@ public class SocketReader {
             DataInputStream data = new DataInputStream(in);
             try {
                 String packetID = data.readUTF();
-                if (packetID.equals("in")) {
-                    try {
-                        byte[] resend = new ByteArrayBuffer().write(((SocketInputEvent) new SocketInputEvent(data.readUTF(), data).call()).respond.toByteArray()).toByteArray();
-                        ctx.writeAndFlush(Unpooled.wrappedBuffer(resend));
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
-                } else {
-                    SocketReadEvent event = new SocketReadEvent(packetID, data, ctx);
-                    event.call();
-                    if (!event.isWritten()) {
+                switch (packetID) {
+                    case "test" -> {
                         ctx.writeAndFlush(Unpooled.wrappedBuffer(new ByteArrayBuffer().writeUTF("OK").toByteArray()));
+                    }
+                    default -> {
+                        SocketReadEvent event = new SocketReadEvent(packetID, data);
+                        event.call();
+                        if (event.getBuffer().toByteArray().length == 0) {
+                            event.getBuffer().writeUTF("OK");
+                        }
+                        ctx.writeAndFlush(Unpooled.wrappedBuffer(event.getBuffer().toByteArray()));
                     }
                 }
             } catch (IOException ex) {

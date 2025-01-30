@@ -57,6 +57,7 @@ public class SocketWriter {
             f.channel().writeAndFlush(Unpooled.wrappedBuffer(data));
             futureResponse.whenComplete((result, error) -> group.shutdownGracefully());
         } catch (Exception e) {
+            e.printStackTrace();
             futureResponse.completeExceptionally(e);
             group.shutdownGracefully();
         }

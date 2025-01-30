@@ -1,20 +1,17 @@
 package top.speedcubing.common.events;
 
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
 import java.io.DataInputStream;
 import top.speedcubing.lib.eventbus.CubingEvent;
+import top.speedcubing.lib.utils.bytes.ByteArrayBuffer;
 
 public class SocketReadEvent extends CubingEvent {
     private final String packetID;
     private final DataInputStream data;
-    private final ChannelHandlerContext ctx;
-    private boolean written = false;
+    private final ByteArrayBuffer buffer = new ByteArrayBuffer();
 
-    public SocketReadEvent(String packetID, DataInputStream data, ChannelHandlerContext ctx) {
+    public SocketReadEvent(String packetID, DataInputStream data) {
         this.packetID = packetID;
         this.data = data;
-        this.ctx = ctx;
     }
 
     public String getPacketID() {
@@ -25,12 +22,7 @@ public class SocketReadEvent extends CubingEvent {
         return this.data;
     }
 
-    public void write(byte[] b) {
-        this.ctx.writeAndFlush(Unpooled.wrappedBuffer(b));
-        this.written = true;
-    }
-
-    public boolean isWritten() {
-        return this.written;
+    public ByteArrayBuffer getBuffer() {
+        return this.buffer;
     }
 }
