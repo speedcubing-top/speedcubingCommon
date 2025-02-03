@@ -21,12 +21,12 @@ import top.speedcubing.lib.utils.internet.HostAndPort;
 
 public class SocketWriter {
 
+    private static final EventLoopGroup sharedGroup = new NioEventLoopGroup();
     public static CompletableFuture<DataInputStream> writeResponse(HostAndPort hostPort, byte[] data) {
-        EventLoopGroup group = new NioEventLoopGroup();
         CompletableFuture<DataInputStream> futureResponse = new CompletableFuture<>();
 
         Bootstrap b = new Bootstrap();
-        b.group(group)
+        b.group(sharedGroup)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -48,11 +48,6 @@ public class SocketWriter {
                                 futureResponse.completeExceptionally(cause);
                                 ctx.close();
                             }
-
-                            @Override
-                            public void channelInactive(ChannelHandlerContext ctx) {
-                                group.shutdownGracefully();
-                            }
                         });
                     }
                 });
@@ -62,7 +57,6 @@ public class SocketWriter {
                 future.channel().writeAndFlush(Unpooled.wrappedBuffer(data));
             } else {
                 futureResponse.completeExceptionally(future.cause());
-                group.shutdownGracefully();
             }
         });
 
