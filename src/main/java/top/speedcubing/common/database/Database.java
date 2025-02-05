@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import top.speedcubing.common.configuration.ServerConfig;
@@ -11,7 +12,7 @@ import top.speedcubing.lib.utils.SQL.SQLConnection;
 
 public class Database {
 
-    public static ConcurrentHashMap<String, HikariDataSource> dataSourceMap = new ConcurrentHashMap<>();
+    public static volatile Map<String, HikariDataSource> dataSourceMap;
 
     public static SQLConnection getCubing() {
         return get("speedcubing");
@@ -53,6 +54,7 @@ public class Database {
         String url = dbConfig.get("url").getAsString();
         String user = dbConfig.get("user").getAsString();
         String password = dbConfig.get("password").getAsString();
+        Map<String, HikariDataSource> newDataSourceMap = new HashMap<>();
         for (String db : databases) {
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(url.replace("%db%", db));
@@ -60,8 +62,9 @@ public class Database {
             config.setPassword(password);
             HikariDataSource dataSource = new HikariDataSource(config);
             reloadDataSourceConfig(dataSource);
-            dataSourceMap.put(db, dataSource);
+            newDataSourceMap.put(db, dataSource);
         }
+        dataSourceMap = newDataSourceMap;
     }
 
     public static void reloadDataSourceConfig() {

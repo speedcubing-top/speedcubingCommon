@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.io.SocketWriter;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
@@ -13,7 +14,7 @@ import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 
 public class MinecraftServer {
-    private static final Map<String, MinecraftServer> servers = new HashMap<>();
+    private static volatile Map<String, MinecraftServer> servers = new HashMap<>();
 
     public static MinecraftServer getServer(String name) {
         return servers.get(name);
@@ -33,7 +34,7 @@ public class MinecraftServer {
     }
 
     public static void loadServers() {
-        servers.clear();
+        Map<String, MinecraftServer> newServers = new HashMap<>();
         try (SQLConnection connection = Database.getConfig()) {
             SQLResult result = connection.select("name,host,port,accept_socket").from("mc_servers").executeResult();
             for (SQLRow r : result) {
@@ -41,9 +42,10 @@ public class MinecraftServer {
                 String host = r.getString("host");
                 int port = r.getInt("port");
                 boolean accept_socket = r.getBoolean("accept_socket");
-                servers.put(name, new MinecraftServer(name, new HostAndPort(host, port), accept_socket));
+                newServers.put(name, new MinecraftServer(name, new HostAndPort(host, port), accept_socket));
             }
         }
+        servers = newServers;
     }
 
     private final HostAndPort listenerAddress;

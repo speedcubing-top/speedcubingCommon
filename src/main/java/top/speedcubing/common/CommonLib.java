@@ -5,8 +5,7 @@ import top.speedcubing.common.database.Database;
 
 public class CommonLib {
     public static void init() {
-        ServerConfig.reload(true);
-        CubingTick.init();
+        init("/storage/server.json");
     }
 
     public static void init(String configPath) {

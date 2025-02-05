@@ -22,6 +22,7 @@ import top.speedcubing.lib.utils.internet.HostAndPort;
 public class SocketWriter {
 
     private static final EventLoopGroup sharedGroup = new NioEventLoopGroup();
+
     public static CompletableFuture<DataInputStream> writeResponse(HostAndPort hostPort, byte[] data) {
         CompletableFuture<DataInputStream> futureResponse = new CompletableFuture<>();
 

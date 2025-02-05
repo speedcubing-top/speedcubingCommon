@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.io.SocketWriter;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
@@ -13,7 +14,7 @@ import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 
 public class MinecraftProxy {
-    private static final Map<String, MinecraftProxy> proxies = new HashMap<>();
+    private static volatile Map<String, MinecraftProxy> proxies = new HashMap<>();
 
     public static MinecraftProxy getProxy(String name) {
         return proxies.get(name);
@@ -33,16 +34,17 @@ public class MinecraftProxy {
     }
 
     public static void loadProxies() {
-        proxies.clear();
+        Map<String, MinecraftProxy> newProxies = new HashMap<>();
         try (SQLConnection connection = Database.getConfig()) {
             SQLResult result = connection.select("name,host,port").from("mc_proxies").executeResult();
             for (SQLRow r : result) {
                 String name = r.getString("name");
                 String host = r.getString("host");
                 int port = r.getInt("port");
-                proxies.put(name, new MinecraftProxy(name, new HostAndPort(host, port)));
+                newProxies.put(name, new MinecraftProxy(name, new HostAndPort(host, port)));
             }
         }
+        proxies = newProxies;
     }
 
     private final HostAndPort listenerAddress;

@@ -9,7 +9,7 @@ import top.speedcubing.lib.utils.SQL.SQLConnection;
 
 public class CubingTick {
     public static Timer tickTimer;
-    private static final CubingTickEvent event = new CubingTickEvent();
+    public static int tick = 0;
 
     public static void init() {
         tickTimer = new Timer("Cubing-Tick-Thread");
@@ -22,7 +22,9 @@ public class CubingTick {
                     DatabaseData.champs.clear();
                     cubing.select("id").from("champ").executeResult().forEach(r -> r.forEach(f -> DatabaseData.champs.add(f.getInt())));
                     DatabaseData.onlineCount = system.select("SUM(onlinecount)").from("proxies").executeResult().getInt();
+                    CubingTickEvent event = new CubingTickEvent(tick);
                     event.call();
+                    tick++;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

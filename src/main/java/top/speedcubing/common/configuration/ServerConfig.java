@@ -8,18 +8,20 @@ import top.speedcubing.common.events.ConfigReloadEvent;
 import top.speedcubing.common.rank.RankLoader;
 import top.speedcubing.common.server.MinecraftProxy;
 import top.speedcubing.common.server.MinecraftServer;
+import top.speedcubing.lib.eventbus.CubingEventHandler;
 
 public class ServerConfig {
     public static JsonObject config;
-    private static final ConfigReloadEvent event = new ConfigReloadEvent();
-
-    public static void reload(boolean init) {
-        reload("/storage/server.json", init);
-    }
+    private static String configPath;
 
     public static void reload(String path, boolean init) {
+        configPath = path;
+        reload(init);
+    }
+
+    public static void reload(boolean init) {
         try {
-            config = JsonParser.parseReader(new FileReader(path)).getAsJsonObject();
+            config = JsonParser.parseReader(new FileReader(configPath)).getAsJsonObject();
 
             if (init) {
                 Database.connect();
@@ -29,9 +31,13 @@ public class ServerConfig {
             RankLoader.loadRanks();
             MinecraftServer.loadServers();
             MinecraftProxy.loadProxies();
-            event.call();
         } catch (Exception exception) {
             exception.printStackTrace();
         }
+    }
+
+    @CubingEventHandler(priority = 10)
+    public void configReloadEvent(ConfigReloadEvent e) {
+        reload(false);
     }
 }
