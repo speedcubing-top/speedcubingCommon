@@ -2,6 +2,7 @@ package top.speedcubing.common;
 
 import top.speedcubing.common.configuration.ServerConfig;
 import top.speedcubing.common.database.Database;
+import top.speedcubing.lib.eventbus.CubingEventManager;
 
 public class CommonLib {
     public static void init() {
@@ -9,7 +10,9 @@ public class CommonLib {
     }
 
     public static void init(String configPath) {
-        ServerConfig.reload(configPath, true);
+        ServerConfig config = new ServerConfig();
+        config.reload(configPath, true);
+        CubingEventManager.registerListeners(config);
         CubingTick.init();
     }
 

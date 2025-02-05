@@ -11,16 +11,26 @@ import top.speedcubing.common.server.MinecraftServer;
 import top.speedcubing.lib.eventbus.CubingEventHandler;
 
 public class ServerConfig {
-    public static JsonObject config;
-    private static String configPath;
+    private JsonObject config;
+    private String configPath;
+    private static ServerConfig instance;
 
-    public static void reload(String path, boolean init) {
+    public ServerConfig() {
+        instance = this;
+    }
+
+    public static JsonObject getConfig() {
+        return instance.config;
+    }
+
+    public void reload(String path, boolean init) {
         configPath = path;
         reload(init);
     }
 
-    public static void reload(boolean init) {
+    public void reload(boolean init) {
         try {
+            System.out.println("[speedcubingCommon] loading config");
             config = JsonParser.parseReader(new FileReader(configPath)).getAsJsonObject();
 
             if (init) {

@@ -50,7 +50,7 @@ public class Database {
         }
 
         String[] databases = {"sc_config", "speedcubing", "speedcubingsystem"};
-        JsonObject dbConfig = ServerConfig.config.getAsJsonObject("database");
+        JsonObject dbConfig = ServerConfig.getConfig().getAsJsonObject("database");
         String url = dbConfig.get("url").getAsString();
         String user = dbConfig.get("user").getAsString();
         String password = dbConfig.get("password").getAsString();
@@ -74,7 +74,7 @@ public class Database {
     }
 
     public static void reloadDataSourceConfig(HikariDataSource dataSource) {
-        JsonObject hikariCPConfig = ServerConfig.config.getAsJsonObject("database").getAsJsonObject("hikaricp");
+        JsonObject hikariCPConfig = ServerConfig.getConfig().getAsJsonObject("database").getAsJsonObject("hikaricp");
         if (hikariCPConfig.has("connectionTimeout"))
             dataSource.setConnectionTimeout(hikariCPConfig.get("connectionTimeout").getAsLong());
 
