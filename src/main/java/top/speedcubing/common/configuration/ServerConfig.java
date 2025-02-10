@@ -3,6 +3,7 @@ package top.speedcubing.common.configuration;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.FileReader;
+import top.speedcubing.common.CommonLib;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.events.ConfigReloadEvent;
 import top.speedcubing.common.rank.RankLoader;
@@ -30,7 +31,7 @@ public class ServerConfig {
 
     public void reload(boolean init) {
         try {
-            System.out.println("[speedcubingCommon] loading config");
+            CommonLib.logger.info("loading common config");
             config = JsonParser.parseReader(new FileReader(configPath)).getAsJsonObject();
 
             if (init) {

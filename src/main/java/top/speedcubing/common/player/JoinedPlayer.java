@@ -10,10 +10,11 @@ import top.speedcubing.lib.utils.SQL.SQLRow;
 public class JoinedPlayer extends MinecraftPlayer {
     public final int id;
     public final String ip;
-    public String realRank;
+    public final String realRank;
     public String displayRank;
-    public final int lang;
-    public String timeZone;
+    public String displayName;
+    public int lang;
+    public final String timeZone;
     public final boolean isStaff;
 
     public enum SearchType {
@@ -23,24 +24,25 @@ public class JoinedPlayer extends MinecraftPlayer {
     }
 
     // offline
-    public JoinedPlayer(UUID uuid, SQLRow playersdata) {
-        this(uuid, playersdata.getString("name"), playersdata);
+    public JoinedPlayer(UUID uuid, SQLRow r) {
+        this(uuid, r.getString("name"), r);
     }
 
     // offline
-    public JoinedPlayer(UUID uuid, String realName, SQLRow playersdata) {
-        this(uuid, realName, playersdata.getInt("id"), playersdata.getString("ip"), playersdata.getString("priority"), playersdata.getString("nickpriority"), playersdata);
+    public JoinedPlayer(UUID uuid, String realName, SQLRow r) {
+        this(uuid, realName, r.getInt("id"), r.getString("ip"), r.getString("priority"), r.getString("nickpriority"), r.getString("nickname"), r);
     }
 
     // online
-    public JoinedPlayer(UUID uuid, String realName, int id, String ip, String realRank, String displayRank, SQLRow playersdata) {
+    public JoinedPlayer(UUID uuid, String realName, int id, String ip, String realRank, String displayRank, String displayName, SQLRow r) {
         super(uuid, realName);
         this.id = id;
         this.ip = ip;
         this.realRank = realRank;
         this.displayRank = displayRank;
-        this.lang = playersdata.getInt("lang");
-        this.timeZone = playersdata.getString("timezone");
+        this.displayName = displayName;
+        this.lang = r.getInt("lang");
+        this.timeZone = r.getString("timezone");
         this.isStaff = Rank.isStaff(realRank);
     }
 

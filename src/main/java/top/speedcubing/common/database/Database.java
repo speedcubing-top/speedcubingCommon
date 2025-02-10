@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
+import top.speedcubing.common.CommonLib;
 import top.speedcubing.common.configuration.ServerConfig;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 
@@ -43,9 +45,9 @@ public class Database {
     public static void connect() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            System.out.println("MySQL JDBC Driver Registered!");
+            CommonLib.logger.info("MySQL JDBC Driver Registered!");
         } catch (ClassNotFoundException e) {
-            System.out.println("MySQL JDBC Driver not found.");
+            CommonLib.logger.warning("MySQL JDBC Driver not found.");
             return;
         }
 
@@ -104,10 +106,10 @@ public class Database {
             try {
                 if (dataSource != null && !dataSource.isClosed()) {
                     dataSource.close();
-                    System.out.println("Closed connection pool for database: " + dbName);
+                    CommonLib.logger.info("Closed connection pool for database: " + dbName);
                 }
             } catch (Exception e) {
-                System.err.println("Failed to close connection pool for database: " + dbName + " - " + e.getMessage());
+                CommonLib.logger.warning("Failed to close connection pool for database: " + dbName + " - " + e.getMessage());
             }
         }
         dataSourceMap.clear();

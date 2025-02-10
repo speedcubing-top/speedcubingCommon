@@ -22,9 +22,9 @@ public class CubingTick {
                     DatabaseData.champs.clear();
                     cubing.select("id").from("champ").executeResult().forEach(r -> r.forEach(f -> DatabaseData.champs.add(f.getInt())));
                     DatabaseData.onlineCount = system.select("SUM(onlinecount)").from("proxies").executeResult().getInt();
+                    tick++;
                     CubingTickEvent event = new CubingTickEvent(tick);
                     event.call();
-                    tick++;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
