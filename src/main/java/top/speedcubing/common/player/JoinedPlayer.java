@@ -10,7 +10,7 @@ import top.speedcubing.lib.utils.SQL.SQLRow;
 public class JoinedPlayer extends MinecraftPlayer {
     public final int id;
     public final String ip;
-    public final String realRank;
+    public String realRank;
     public String displayRank;
     public String displayName;
     public int lang;
