@@ -11,7 +11,9 @@ public class JoinedPlayer extends MinecraftPlayer {
     public final int id;
     public final String ip;
     public String realRank;
+    public String displayRank;
     public final int lang;
+    public String timeZone;
     public final boolean isStaff;
 
     public enum SearchType {
@@ -27,16 +29,18 @@ public class JoinedPlayer extends MinecraftPlayer {
 
     // offline
     public JoinedPlayer(UUID uuid, String realName, SQLRow playersdata) {
-        this(uuid, realName, playersdata.getInt("id"), playersdata.getString("ip"), playersdata.getString("priority"), playersdata.getInt("lang"));
+        this(uuid, realName, playersdata.getInt("id"), playersdata.getString("ip"), playersdata.getString("priority"), playersdata.getString("nickpriority"), playersdata);
     }
 
     // online
-    public JoinedPlayer(UUID uuid, String realName, int id, String ip, String realRank, int lang) {
+    public JoinedPlayer(UUID uuid, String realName, int id, String ip, String realRank, String displayRank, SQLRow playersdata) {
         super(uuid, realName);
         this.id = id;
         this.ip = ip;
         this.realRank = realRank;
-        this.lang = lang;
+        this.displayRank = displayRank;
+        this.lang = playersdata.getInt("lang");
+        this.timeZone = playersdata.getString("timezone");
         this.isStaff = Rank.isStaff(realRank);
     }
 
