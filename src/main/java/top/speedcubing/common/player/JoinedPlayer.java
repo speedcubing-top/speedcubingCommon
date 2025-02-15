@@ -17,12 +17,6 @@ public class JoinedPlayer extends MinecraftPlayer {
     public final String timeZone;
     public final boolean isStaff;
 
-    public enum SearchType {
-        ALL, //displayname realname match
-        REAL, //realname match
-        FAKE //displayname match
-    }
-
     // offline
     public JoinedPlayer(UUID uuid, SQLRow r) {
         this(uuid, r.getString("name"), r);
