@@ -8,10 +8,8 @@ import top.speedcubing.lib.utils.SQL.SQLConnection;
 public class DailyStats {
     public static void update(String s) {
         try (SQLConnection connection = Database.getSystem()) {
-            connection.doTransaction(() -> {
-                connection.executeUpdate("INSERT IGNORE INTO daily (date) VALUES (" + getToday() + ")");
-                connection.executeUpdate("UPDATE daily SET " + s + " WHERE date='" + getToday() + "'");
-            });
+            connection.executeUpdate("INSERT INTO daily (date, playtime) VALUES (" + getToday() + ", 34) " +
+                    "ON DUPLICATE KEY UPDATE " + s);
         }
     }
 
