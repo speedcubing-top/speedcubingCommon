@@ -13,7 +13,7 @@ public class DailyStats {
         }
     }
 
-    public static String getToday() {
+    private static String getToday() {
         return DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDateTime.now());
     }
 }
