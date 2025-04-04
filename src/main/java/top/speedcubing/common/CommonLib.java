@@ -4,6 +4,7 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import top.speedcubing.common.configuration.ServerConfig;
 import top.speedcubing.common.database.Database;
+import top.speedcubing.common.namedb.NameDb;
 import top.speedcubing.lib.eventbus.CubingEventManager;
 
 public class CommonLib {
@@ -19,6 +20,7 @@ public class CommonLib {
         ServerConfig config = new ServerConfig();
         config.reload(configPath, true);
         CubingEventManager.registerListeners(config);
+        CubingEventManager.registerListeners(new NameDb());
         CubingTick.init();
     }
 
