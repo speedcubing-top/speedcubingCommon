@@ -12,7 +12,26 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>speedcubing-top</id>
+            <url>https://repo.speedcubing.top/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>speedcubing-public-projects-release</id>
+            <url>https://repo.speedcubing.top/repository/maven-public-projects-release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>speedcubing-public-projects-snapshot</id>
+            <url>https://repo.speedcubing.top/repository/maven-public-projects-snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
