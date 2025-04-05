@@ -30,9 +30,9 @@ public class ServerConfig {
     }
 
     public void reload(boolean init) {
-        try {
+        try (FileReader reader = new FileReader(configPath)) {
             CommonLib.logger.info("loading common config");
-            config = JsonParser.parseReader(new FileReader(configPath)).getAsJsonObject();
+            config = JsonParser.parseReader(reader).getAsJsonObject();
 
             if (init) {
                 Database.connect();
