@@ -18,11 +18,11 @@ public class NameDb {
         long t = millis / 1000L;
         uuid = UUIDUtils.undash(uuid);
         try (SQLConnection connection = Database.getSystem()) {
-            SQLResult result = connection.select("name,first").from("namedb").where("uuid='" + uuid + "'").orderBy("last DESC").executeResult();
+            SQLResult result = connection.select("name,first").from("namedb").where("uuid=X'" + uuid + "'").orderBy("last DESC").executeResult();
             if (!result.isEmpty() && result.get(0).getString("name").equals(name))
-                connection.update("namedb", "last=" + t, "uuid='" + uuid + "' AND first=" + result.get(0).getInt("first"));
+                connection.update("namedb", "last=" + t, "uuid=X'" + uuid + "' AND first=" + result.get(0).getInt("first"));
             else
-                connection.insert("namedb", "uuid,name,first,last", "'" + uuid + "','" + name + "'," + t + "," + t);
+                connection.insert("namedb", "uuid,name,first,last", "X'" + uuid + "','" + name + "'," + t + "," + t);
         }
     }
 }
