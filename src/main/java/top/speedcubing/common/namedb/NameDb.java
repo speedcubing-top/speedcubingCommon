@@ -1,11 +1,11 @@
 package top.speedcubing.common.namedb;
 
-import java.io.IOException;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.lib.bukkit.events.packet.ProfileRespondEvent;
 import top.speedcubing.lib.eventbus.CubingEventHandler;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 import top.speedcubing.lib.utils.SQL.SQLResult;
+import top.speedcubing.lib.utils.UUIDUtils;
 
 public class NameDb {
 
@@ -14,8 +14,9 @@ public class NameDb {
         pushData(e.getProfile().getUUID(), e.getProfile().getName(), e.getProfile().getTimeMillis());
     }
 
-    private static void pushData(String uuid, String name, long millis) {
+    public static void pushData(String uuid, String name, long millis) {
         long t = millis / 1000L;
+        uuid = UUIDUtils.undash(uuid);
         try (SQLConnection connection = Database.getSystem()) {
             SQLResult result = connection.select("name,first").from("namedb").where("uuid='" + uuid + "'").orderBy("last DESC").executeResult();
             if (!result.isEmpty() && result.get(0).getString("name").equals(name))
