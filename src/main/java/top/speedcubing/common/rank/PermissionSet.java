@@ -1,6 +1,7 @@
 package top.speedcubing.common.rank;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,7 +13,6 @@ import top.speedcubing.common.database.Database;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
 import top.speedcubing.lib.utils.SQL.SQLResult;
 import top.speedcubing.lib.utils.SQL.SQLRow;
-import top.speedcubing.lib.utils.collection.Sets;
 
 public class PermissionSet {
 
@@ -29,7 +29,7 @@ public class PermissionSet {
 
     private PermissionSet(String name, String perms) {
         this.name = name;
-        this.permissions.addAll(Sets.hashSet(perms.split("\\|")));
+        this.permissions.addAll(Arrays.asList(perms.split("\\|")));
     }
 
     public Set<String> getPerms() {
