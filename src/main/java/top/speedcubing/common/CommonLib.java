@@ -1,7 +1,6 @@
 package top.speedcubing.common;
 
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import top.speedcubing.common.configuration.ServerConfig;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.namedb.NameDb;

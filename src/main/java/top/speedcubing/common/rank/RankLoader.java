@@ -1,7 +1,8 @@
 package top.speedcubing.common.rank;
 
-import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import top.speedcubing.common.database.Database;
@@ -28,7 +29,7 @@ public class RankLoader {
                 String prefix = r.getString("prefix");
                 String chatColor = r.getString("chatcolor");
                 long discord = r.getLong("discord");
-                Set<String> perms = Sets.newHashSet(r.getString("perms").split("\\|"));
+                Set<String> perms = new HashSet<>(Arrays.asList(r.getString("perms").split("\\|")));
 
                 Rank rank = new Rank(name, weight, prefix, chatColor, discord, perms);
                 Rank.rankByName.put(name, rank);
