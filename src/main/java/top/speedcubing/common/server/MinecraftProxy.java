@@ -13,7 +13,7 @@ import top.speedcubing.lib.utils.SQL.SQLResult;
 import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 
-public class MinecraftProxy {
+public class MinecraftProxy implements Writable{
     private static volatile Map<String, MinecraftProxy> proxies = new HashMap<>();
 
     public static MinecraftProxy getProxy(String name) {
@@ -62,6 +62,7 @@ public class MinecraftProxy {
         }
     }
 
+    @Override
     public CompletableFuture<DataInputStream> write(byte[] data) {
         return SocketWriter.writeResponse(listenerAddress, data);
     }

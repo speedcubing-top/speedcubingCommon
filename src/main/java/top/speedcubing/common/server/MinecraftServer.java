@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import top.speedcubing.common.database.Database;
 import top.speedcubing.common.io.SocketWriter;
 import top.speedcubing.lib.utils.SQL.SQLConnection;
@@ -13,7 +12,7 @@ import top.speedcubing.lib.utils.SQL.SQLResult;
 import top.speedcubing.lib.utils.SQL.SQLRow;
 import top.speedcubing.lib.utils.internet.HostAndPort;
 
-public class MinecraftServer {
+public class MinecraftServer implements Writable {
     private static volatile Map<String, MinecraftServer> servers = new HashMap<>();
 
     public static MinecraftServer getServer(String name) {
@@ -65,6 +64,7 @@ public class MinecraftServer {
         }
     }
 
+    @Override
     public CompletableFuture<DataInputStream> write(byte[] data) {
         return SocketWriter.writeResponse(listenerAddress, data);
     }
