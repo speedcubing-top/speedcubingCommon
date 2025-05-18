@@ -9,11 +9,13 @@ import top.speedcubing.lib.utils.SQL.SQLRuntimeException;
 public class DailyStats {
     public static void update(String s) {
         try (SQLConnection connection = Database.getSystem()) {
-            try {
-                connection.executeUpdate("INSERT INTO daily (date, playtime) VALUES (" + getToday() + ", 0) ");
-            } catch (SQLRuntimeException ignored) {
-            }
-            connection.executeUpdate("UPDATE daily SET " + s + " WHERE date='" + getToday() + "'");
+            connection.doTransaction(() -> {
+                try {
+                    connection.executeUpdate("INSERT INTO daily (date, playtime) VALUES (" + getToday() + ", 0) ");
+                } catch (SQLRuntimeException ignored) {
+                }
+                connection.executeUpdate("UPDATE daily SET " + s + " WHERE date='" + getToday() + "'");
+            });
         }
     }
 
