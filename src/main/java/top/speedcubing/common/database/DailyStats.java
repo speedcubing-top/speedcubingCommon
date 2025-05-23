@@ -8,13 +8,15 @@ import top.speedcubing.lib.utils.SQL.SQLRuntimeException;
 
 public class DailyStats {
     public static void update(String s) {
+        String today = getToday();
         try (SQLConnection connection = Database.getSystem()) {
             connection.doTransaction(() -> {
                 try {
-                    connection.executeUpdate("INSERT INTO daily (date, playtime) VALUES (" + getToday() + ", 0) ");
+                    connection.executeUpdate("INSERT INTO daily (date, playtime) VALUES (" + today + ", 0) ");
                 } catch (SQLRuntimeException ignored) {
                 }
-                connection.executeUpdate("UPDATE daily SET " + s + " WHERE date='" + getToday() + "'");
+                connection.executeQuery("SELECT playtime FROM daily WHERE date='" + today + "' FOR UPDATE");
+                connection.executeUpdate("UPDATE daily SET " + s + " WHERE date='" + today + "'");
             });
         }
     }
