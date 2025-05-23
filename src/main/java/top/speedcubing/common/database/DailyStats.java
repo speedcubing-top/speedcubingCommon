@@ -12,11 +12,11 @@ public class DailyStats {
         try (SQLConnection connection = Database.getSystem()) {
             connection.doTransaction(() -> {
                 try {
-                    connection.executeUpdate("INSERT INTO daily (date, playtime) VALUES (" + today + ", 0) ");
+                    connection.executeUpdate("INSERT INTO daily (date) VALUES (" + today + ") ");
                 } catch (SQLRuntimeException ignored) {
                 }
-                connection.executeQuery("SELECT playtime FROM daily WHERE date='" + today + "' FOR UPDATE");
-                connection.executeUpdate("UPDATE daily SET " + s + " WHERE date='" + today + "'");
+                connection.executeQuery("SELECT playtime FROM daily WHERE date=" + today + " FOR UPDATE");
+                connection.executeUpdate("UPDATE daily SET " + s + " WHERE date=" + today);
             });
         }
     }
